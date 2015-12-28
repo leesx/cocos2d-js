@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello Cocos2d-JS</title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="cocos2d-js-v3.9-lite.js" charset="UTF-8"></script>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="450"></canvas>
+    <script type="text/javascript">
+          window.onload = function(){
+              cc.game.onStart = function(){
+                    cc.LoaderScene.preload(['HelloWorld.png','laya.png','xueren.png'],function(){
+                        var MyScene = cc.Scene.extend({
+                            onEnter:function(){
+                                this._super();
+                                var size = cc.director.getWinSize();
+
+                                var sprite = cc.Sprite.create('HelloWorld.png');
+                                sprite.setPosition(size.width/2,size.height/2);
+                                sprite.setScale(1);
+                                this.addChild(sprite);
+
+                                var sprite2 = cc.Sprite.create('laya.png');
+                                sprite2.setPosition(size.width/5,size.height/5);
+                                sprite2.setScale(0.5);
+                                this.addChild(sprite2);
+
+                                var label_hello = cc.LabelTTF.create('Hello cocos2d!','Microsoft YaHei','30');
+                                label_hello.setPosition(size.width/2,size.height/2);
+                                this.addChild(label_hello);
+
+                                var label_Lsx = cc.LabelTTF.create('Hello LiShangxi!','Microsoft YaHei','30');
+                                label_Lsx.setPosition(200,200);
+                                this.addChild(label_Lsx);
+
+                                /*旋转 淡出*/
+                                var child = new cc.Sprite('laya.png');
+                                child.x = size.width;
+                                child.y = size.height;
+                                this.addChild(child, 1);
+                                child.runAction(cc.rotateBy(1.5, 90));
+                                child.runAction(cc.sequence(
+                                        cc.delayTime(1.4),
+                                        cc.fadeOut(1.1))
+                                );
+
+
+                                /*移动位置*/
+                                var grossini = new cc.Sprite('xueren.png');
+                                this.addChild(grossini, 0, 2);
+                                grossini.x = 200;
+                                grossini.y = 200;
+
+                                grossini.runAction(cc.sequence(
+                                        cc.moveBy(1, cc.p(size.width/2, size.width/2)),
+                                        cc.callFunc(this.onBugMe, this))
+                                );
+                                /**/
+                                var blockSize = cc.size(200, 160);
+                                var s = cc.director.getWinSize();
+
+                                var colorLayer = new cc.LayerColor(cc.color(100, 100, 100, 255), blockSize.width, blockSize.height);
+                                colorLayer.anchorX = 0;
+                                colorLayer.anchorY = 0;
+                                colorLayer.x = (s.width - blockSize.width) / 2;
+                                colorLayer.y = (s.height - blockSize.height) / 2;
+
+                                this.addChild(colorLayer);
+                                cc.MenuItemFont.setFontSize(30);
+                                var menu = new cc.Menu(
+                                        new cc.MenuItemFont("Left", this.setAlignmentLeft, this),
+                                        new cc.MenuItemFont("Center", this.setAlignmentCenter, this),
+                                        new cc.MenuItemFont("Right", this.setAlignmentRight, this));
+                                menu.alignItemsVerticallyWithPadding(4);
+                                menu.x = 50;
+                                menu.y = s.height / 2 - 20;
+                                this.addChild(menu);
+
+                                menu = new cc.Menu(
+                                        new cc.MenuItemFont("Top", this.setAlignmentTop, this),
+                                        new cc.MenuItemFont("Middle", this.setAlignmentMiddle, this),
+                                        new cc.MenuItemFont("Bottom", this.setAlignmentBottom, this));
+                                menu.alignItemsVerticallyWithPadding(4);
+                                menu.x = s.width - 50;
+                                menu.y = s.height / 2 - 20;
+                                this.addChild(menu);
+
+                                this._label = null;
+                                this._horizAlign = cc.TEXT_ALIGNMENT_LEFT;
+                                this._vertAlign = cc.VERTICAL_TEXT_ALIGNMENT_TOP;
+
+                                this.updateAlignment();
+
+
+                            },
+                            onBugMe:function(){
+                                console.log('完成');
+                            }
+                        });
+                        var MouseTest = EventTest.extend({
+                            init:function () {
+                                this._super();
+                                var sprite = this.sprite = new cc.Sprite(s_pathR2);
+                                this.addChild(sprite);
+                                sprite.x = 0;
+                                sprite.y = 0;
+                                sprite.scale = 1;
+                                sprite.color = cc.color(Math.random()*200+55, Math.random()*200+55, Math.random()*200+55);
+
+                                if( 'mouse' in cc.sys.capabilities ) {
+                                    cc.eventManager.addListener({
+                                        event: cc.EventListener.MOUSE,
+                                        onMouseDown: function(event){
+                                            var pos = event.getLocation(), target = event.getCurrentTarget();
+                                            if(event.getButton() === cc.EventMouse.BUTTON_RIGHT)
+                                                cc.log("onRightMouseDown at: " + pos.x + " " + pos.y );
+                                            else if(event.getButton() === cc.EventMouse.BUTTON_LEFT)
+                                                cc.log("onLeftMouseDown at: " + pos.x + " " + pos.y );
+                                            target.sprite.x = pos.x;
+                                            target.sprite.y = pos.y;
+                                        },
+                                        onMouseMove: function(event){
+                                            var pos = event.getLocation(), target = event.getCurrentTarget();
+                                            cc.log("onMouseMove at: " + pos.x + " " + pos.y );
+                                            target.sprite.x = pos.x;
+                                            target.sprite.y = pos.y;
+                                        },
+                                        onMouseUp: function(event){
+                                            var pos = event.getLocation(), target = event.getCurrentTarget();
+                                            target.sprite.x = pos.x;
+                                            target.sprite.y = pos.y;
+                                            cc.log("onMouseUp at: " + pos.x + " " + pos.y );
+                                        }
+                                    }, this);
+                                } else {
+                                    cc.log("MOUSE Not supported");
+                                }
+                            },
+                            subtitle:function () {
+                                return "Mouse test. Move mouse and see console";
+                            }
+                        });
+                        cc.director.runScene(new MyScene());
+                    },this);
+
+              };
+
+              cc.game.run("gameCanvas");
+              
+
+          };
+    </script>
+</body>
+</html>
